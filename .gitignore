@@ -1,0 +1,5 @@
+node_modules/
+grabkit-downloads/
+*.log
+.env
+.env.*

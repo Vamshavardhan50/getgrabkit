@@ -1,0 +1,19 @@
+# Runtime-unneeded files
+node_modules/
+grabkit-downloads/
+
+# Local environment and secrets
+.env
+.env.*
+
+# Logs and archives
+*.log
+*.tgz
+
+# VCS/editor metadata
+.git/
+.gitignore
+.vscode/
+
+# Agent/memory artifacts
+memories/

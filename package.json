@@ -1,0 +1,50 @@
+{
+  "name": "getgrabkit",
+  "version": "0.1.1",
+  "description": "Deterministic advanced TUI for selecting and downloading GitHub repository files",
+  "license": "MIT",
+  "keywords": [
+    "cli",
+    "tui",
+    "github",
+    "downloader",
+    "terminal",
+    "grabkit"
+  ],
+  "preferGlobal": true,
+  "files": [
+    "bin",
+    "cli",
+    "services",
+    "ui",
+    "utils",
+    "README.md",
+    "LICENSE"
+  ],
+  "bin": {
+    "grabkit": "bin/grabkit.js"
+  },
+  "main": "./cli/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node ./bin/grabkit.js",
+    "dev": "node ./bin/grabkit.js",
+    "restore": "node ./bin/grabkit.js restore",
+    "prepack": "node -e \"try{require('fs').chmodSync('bin/grabkit.js',0o755)}catch(_e){}\""
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@octokit/rest": "^21.1.1",
+    "archiver": "^7.0.1",
+    "blessed": "^0.1.81",
+    "blessed-contrib": "^4.11.0",
+    "chalk": "^4.1.2",
+    "cli-highlight": "^2.1.11",
+    "dotenv": "^17.4.2"
+  }
+}
