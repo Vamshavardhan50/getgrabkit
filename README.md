@@ -19,7 +19,7 @@ Key benefits:
 
 ## Documentation Website
 
-- Live docs URL: https://vamshavardhan50.github.io/getgrabkit/
+- Live docs URL: https://getgrabkit.vercel.app/
 - Source files: `docs/`
 - Deployment workflow: `.github/workflows/deploy-docs.yml`
 
