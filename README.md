@@ -17,6 +17,26 @@ Key benefits:
 - Built-in visibility (tree explorer + preview + dependency insight)
 - Developer-friendly CLI controls and restore workflow
 
+## Documentation Website
+
+- Live docs URL: https://vamshavardhan50.github.io/getgrabkit/
+- Source files: `docs/`
+- Deployment workflow: `.github/workflows/deploy-docs.yml`
+
+GitHub setup (one-time):
+
+1. Open repository Settings -> Pages.
+2. Set Build and deployment Source to GitHub Actions.
+3. Push to `main` to trigger docs deployment.
+
+Local preview:
+
+```bash
+python -m http.server 4173 --directory docs
+```
+
+Then open: http://localhost:4173
+
 ## Features
 
 - Interactive full-screen TUI file explorer

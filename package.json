@@ -1,6 +1,6 @@
 {
   "name": "getgrabkit",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "Deterministic advanced TUI for selecting and downloading GitHub repository files",
   "license": "MIT",
   "keywords": [

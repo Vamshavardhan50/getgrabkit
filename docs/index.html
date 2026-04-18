@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GetGrabKit Documentation</title>
+    <meta
+      name="description"
+      content="GetGrabKit documentation website: install, usage, tree explorer controls, Smart Grab, and troubleshooting."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero" id="top">
+      <nav class="top-nav">
+        <a class="brand" href="#top">GetGrabKit Docs</a>
+        <div class="nav-links">
+          <a href="#install">Install</a>
+          <a href="#usage">Usage</a>
+          <a href="#controls">Controls</a>
+          <a href="#smart-grab">Smart Grab</a>
+          <a href="#troubleshooting">Troubleshooting</a>
+        </div>
+      </nav>
+
+      <div class="hero-content">
+        <p class="eyebrow">Dependency-aware GitHub file extraction</p>
+        <h1>GetGrabKit Documentation</h1>
+        <p class="subtext">
+          Explore repositories in a premium terminal UI, select exactly what you
+          need, and download minimal working sets with confidence.
+        </p>
+
+        <div class="quick-command-grid">
+          <div class="cmd-card">
+            <h3>Start TUI</h3>
+            <code>grabkit</code>
+          </div>
+          <div class="cmd-card">
+            <h3>Alias</h3>
+            <code>getgrabkit</code>
+          </div>
+          <div class="cmd-card">
+            <h3>Help</h3>
+            <code>getgrabkit --help</code>
+          </div>
+          <div class="cmd-card">
+            <h3>Restore</h3>
+            <code>grabkit restore ./grabkit.config.json</code>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section id="install" class="card">
+        <h2>Installation</h2>
+        <p>Install globally from npm:</p>
+        <pre><code>npm install -g getgrabkit</code></pre>
+        <p>
+          Supported commands after install:
+          <strong>grabkit</strong> and <strong>getgrabkit</strong>.
+        </p>
+      </section>
+
+      <section id="usage" class="card">
+        <h2>Usage</h2>
+        <ol>
+          <li>Run <code>grabkit</code>.</li>
+          <li>Paste a GitHub repository URL in the input bar.</li>
+          <li>Use arrow keys to navigate the tree explorer.</li>
+          <li>Press Space to select files/folders.</li>
+          <li>Press Enter to download selected files.</li>
+        </ol>
+      </section>
+
+      <section id="controls" class="card">
+        <h2>TUI Controls</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Up / Down</td>
+                <td>Move selection</td>
+              </tr>
+              <tr>
+                <td>Left / Right</td>
+                <td>Collapse or expand folder</td>
+              </tr>
+              <tr>
+                <td>Space</td>
+                <td>Select or unselect file/folder subtree</td>
+              </tr>
+              <tr>
+                <td>Enter</td>
+                <td>Toggle folder or download selected files</td>
+              </tr>
+              <tr>
+                <td>/</td>
+                <td>Filter mode</td>
+              </tr>
+              <tr>
+                <td>s</td>
+                <td>Smart Grab (dependency-aware)</td>
+              </tr>
+              <tr>
+                <td>d</td>
+                <td>Dependency insight</td>
+              </tr>
+              <tr>
+                <td>m</td>
+                <td>Choose download mode</td>
+              </tr>
+              <tr>
+                <td>p</td>
+                <td>Toggle preview panel</td>
+              </tr>
+              <tr>
+                <td>t</td>
+                <td>Switch theme</td>
+              </tr>
+              <tr>
+                <td>q</td>
+                <td>Quit</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="smart-grab" class="card">
+        <h2>Smart Grab</h2>
+        <p>
+          Smart Grab analyzes local JavaScript-family imports and includes
+          dependency files automatically in your final download set.
+        </p>
+        <ul>
+          <li>Detects import, require, and dynamic import for local paths.</li>
+          <li>Ignores external packages by design.</li>
+          <li>Reports unresolved and circular references safely.</li>
+        </ul>
+      </section>
+
+      <section id="troubleshooting" class="card">
+        <h2>Troubleshooting</h2>
+        <h3>Command not found</h3>
+        <pre><code>npm ls -g --depth=0 getgrabkit
+npm config get prefix</code></pre>
+        <p>Make sure your npm global bin directory is in PATH.</p>
+
+        <h3>GitHub API limits</h3>
+        <pre><code>$env:GITHUB_TOKEN="your_token_here"
+setx GITHUB_TOKEN "your_token_here"</code></pre>
+      </section>
+
+      <section id="local-preview" class="card">
+        <h2>Local Docs Preview</h2>
+        <pre><code>python -m http.server 4173 --directory docs</code></pre>
+        <p>Open http://localhost:4173 to preview this docs website locally.</p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>GetGrabKit documentation website for GitHub Pages.</p>
+      <a href="#top">Back to top</a>
+    </footer>
+  </body>
+</html>
