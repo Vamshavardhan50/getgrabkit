@@ -28,6 +28,8 @@ const {
   computeFolderSelectionState,
 } = require("../utils/treeUtils");
 const { parseGitHubRepoUrl } = require("../utils/pathUtils");
+const packageJson = require("../package.json");
+const { HeaderBar } = require("./header");
 
 const DEFAULT_THEME_KEY = "vivid";
 
@@ -48,6 +50,7 @@ const THEMES = {
     folderTag: "blue-fg",
     mutedTag: "white-fg",
     partialTag: "blue-fg",
+    treeGuideTag: "white-fg",
     scrollbar: "white",
     statusFg: "black",
     statusBg: "white",
@@ -66,6 +69,7 @@ const THEMES = {
     folderTag: "white-fg",
     mutedTag: "grey-fg",
     partialTag: "white-fg",
+    treeGuideTag: "grey-fg",
     scrollbar: "grey",
     statusFg: "white",
     statusBg: "black",
@@ -84,6 +88,7 @@ const THEMES = {
     folderTag: "magenta-fg",
     mutedTag: "yellow-fg",
     partialTag: "yellow-fg",
+    treeGuideTag: "blue-fg",
     scrollbar: "cyan",
     statusFg: "black",
     statusBg: "cyan",
@@ -148,6 +153,7 @@ class GrabKitApp {
     this.githubService = options.githubService || new GitHubService();
 
     this.screen = null;
+    this.header = null;
     this.inputBar = null;
     this.treePanel = null;
     this.treeList = null;
@@ -203,12 +209,24 @@ class GrabKitApp {
     this.screen = blessed.screen({
       smartCSR: true,
       fullUnicode: true,
-      title: "GrabKit",
+      title: "GetGrabKit",
     });
+
+    this.header = new HeaderBar({
+      parent: this.screen,
+      title: "GetGrabKit",
+      tagline: "Grab only what you need from GitHub",
+      version: `v${packageJson.version || "1.0.0"}`,
+      status: "Ready",
+      statusType: "ready",
+    });
+
+    const headerHeight = this.header.getHeight();
+    const panelTop = headerHeight + 3;
 
     this.inputBar = blessed.box({
       parent: this.screen,
-      top: 0,
+      top: headerHeight,
       left: 0,
       width: "100%",
       height: 3,
@@ -226,12 +244,12 @@ class GrabKitApp {
 
     this.treePanel = blessed.box({
       parent: this.screen,
-      top: 3,
+      top: panelTop,
       bottom: 1,
       left: 0,
       width: "45%",
       border: "line",
-      label: " Repository Tree ",
+      label: " Tree Explorer ",
       style: {
         fg: theme.fg,
         bg: theme.bg,
@@ -278,7 +296,7 @@ class GrabKitApp {
 
     this.previewPanel = blessed.box({
       parent: this.screen,
-      top: 3,
+      top: panelTop,
       bottom: 1,
       left: "45%",
       width: "55%",
@@ -334,9 +352,9 @@ class GrabKitApp {
     this.treeList.setItems([
       `{${theme.mutedTag}}Enter a GitHub repository URL above to load repository data.{/}`,
     ]);
-    this.previewBox.setContent(
-      "Preview panel\n\nHighlight a file in the tree to preview content.",
-    );
+    this.previewBox.setContent(this.getStartupGuideText());
+
+    this.syncHeaderStatus();
   }
 
   bindEvents() {
@@ -619,11 +637,59 @@ class GrabKitApp {
     );
   }
 
+  getStartupGuideText() {
+    return [
+      "Welcome to GetGrabKit",
+      "",
+      "Start:",
+      "1. Paste a GitHub repository URL in the Input bar.",
+      "2. Press Enter to load repository tree.",
+      "",
+      "TUI Commands:",
+      "↑↓ move  ← collapse  → expand",
+      "Space select/unselect  Enter open/download",
+      "s smart grab  d dependency insight",
+      "/ filter  m mode  p preview  t theme",
+      "a select all  x deselect all  i invert",
+      "q quit",
+      "",
+      "CLI Commands:",
+      "grabkit --help",
+      "getgrabkit --help",
+      "grabkit restore ./grabkit.config.json",
+      "getgrabkit restore ./grabkit.config.json",
+    ].join("\n");
+  }
+
   setStatus(message, level = STATUS_LEVELS.INFO) {
     this.statusText = message;
     this.statusLevel = level;
+    this.syncHeaderStatus();
     this.updateStatusBar();
     this.render();
+  }
+
+  syncHeaderStatus({ loading = false } = {}) {
+    if (!this.header) {
+      return;
+    }
+
+    if (loading) {
+      this.header.setStatus("Loading", "loading");
+      return;
+    }
+
+    if (this.statusLevel === STATUS_LEVELS.WARNING) {
+      this.header.setStatus("Attention", "warning");
+      return;
+    }
+
+    if (this.statusLevel === STATUS_LEVELS.ERROR) {
+      this.header.setStatus("Error", "error");
+      return;
+    }
+
+    this.header.setStatus("Ready", "ready");
   }
 
   updateStatusBar() {
@@ -658,6 +724,7 @@ class GrabKitApp {
 
   startSpinner(baseText) {
     this.stopSpinner();
+    this.syncHeaderStatus({ loading: true });
 
     this.spinnerBaseText = baseText;
     this.spinnerFrameIndex = 0;
@@ -771,6 +838,8 @@ class GrabKitApp {
       this.treeList.setItems([
         `{${this.theme.mutedTag}}Enter a GitHub repository URL above to load repository data.{/}`,
       ]);
+      this.previewBox.setContent(this.getStartupGuideText());
+      this.previewBox.setScroll(0);
       this.currentIndex = 0;
       this.updateInputBar();
       this.updateStatusBar();
@@ -792,8 +861,9 @@ class GrabKitApp {
       MAX_TREE_LINES,
     );
 
-    const rowLines = this.visibleRows.map(({ node, depth }) =>
-      this.formatTreeRow(node, depth),
+    const rowMetadata = this.buildTreeRowMetadata(this.visibleRows);
+    const rowLines = this.visibleRows.map(({ node, depth }, index) =>
+      this.formatTreeRow(node, depth, rowMetadata[index]),
     );
 
     if (rowLines.length === 0) {
@@ -839,8 +909,45 @@ class GrabKitApp {
     this.render();
   }
 
-  formatTreeRow(node, depth) {
-    const indent = "  ".repeat(depth);
+  buildTreeRowMetadata(rows) {
+    const metadata = new Array(rows.length);
+    const depthHasNextSibling = [];
+
+    for (let index = 0; index < rows.length; index += 1) {
+      const currentDepth = rows[index].depth;
+      const nextDepth = index + 1 < rows.length ? rows[index + 1].depth : -1;
+      const isLast = nextDepth <= currentDepth;
+
+      depthHasNextSibling.length = currentDepth;
+
+      let prefix = "";
+      if (currentDepth > 0) {
+        const prefixParts = [];
+        for (
+          let depthIndex = 0;
+          depthIndex < currentDepth - 1;
+          depthIndex += 1
+        ) {
+          prefixParts.push(depthHasNextSibling[depthIndex] ? "│  " : "   ");
+        }
+        prefixParts.push(isLast ? "└─ " : "├─ ");
+        prefix = prefixParts.join("");
+      }
+
+      metadata[index] = {
+        prefix,
+      };
+
+      depthHasNextSibling[currentDepth] = !isLast;
+    }
+
+    return metadata;
+  }
+
+  formatTreeRow(node, _depth, metadata = {}) {
+    const guideTag = this.theme.treeGuideTag || "blue-fg";
+    const safePrefix = escapeTags(metadata.prefix || "");
+    const guidePrefix = safePrefix ? `{${guideTag}}${safePrefix}{/}` : "";
     const safeName = escapeTags(node.name);
 
     if (node.type === "dir") {
@@ -850,18 +957,26 @@ class GrabKitApp {
       };
 
       const check = folderState.all
-        ? "{green-fg}[✔]{/}"
+        ? "{green-fg}●{/}"
         : folderState.partial
-          ? `{${this.theme.partialTag}}[~]{/}`
-          : "[ ]";
-      const caret = node.expanded ? "▾" : "▸";
+          ? `{${this.theme.partialTag}}◐{/}`
+          : "{gray-fg}○{/}";
+      const caret = node.expanded ? "{cyan-fg}▾{/}" : "{cyan-fg}▸{/}";
 
-      return `${indent}${caret} ${check} {${this.theme.folderTag}}${safeName}{/}`;
+      const folderLabel =
+        this.themeKey === "minimal"
+          ? `{${this.theme.folderTag}}${safeName}{/}`
+          : `{white-fg}{magenta-bg} ${safeName} {/}`;
+
+      return `${guidePrefix}${caret} ${check} {magenta-fg}◼{/} ${folderLabel}`;
     }
 
     const isSelected = this.selectedFiles.has(node.path);
-    const check = isSelected ? "{green-fg}[✔]{/}" : "[ ]";
-    return `${indent}  ${check} ${safeName}`;
+    const check = isSelected ? "{green-fg}●{/}" : "{gray-fg}○{/}";
+    const fileLabel =
+      this.themeKey === "minimal" ? safeName : `{cyan-fg}${safeName}{/}`;
+
+    return `${guidePrefix}  ${check} {blue-fg}•{/} ${fileLabel}`;
   }
 
   getCurrentNode() {
@@ -1505,6 +1620,10 @@ class GrabKitApp {
     if (this.statusBar) {
       this.statusBar.style.fg = this.theme.statusFg;
       this.statusBar.style.bg = this.theme.statusBg;
+    }
+
+    if (this.header) {
+      this.header.render();
     }
 
     this.refreshTree(false);

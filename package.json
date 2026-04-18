@@ -1,6 +1,6 @@
 {
   "name": "getgrabkit",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Deterministic advanced TUI for selecting and downloading GitHub repository files",
   "license": "MIT",
   "keywords": [
@@ -22,15 +22,16 @@
     "LICENSE"
   ],
   "bin": {
-    "grabkit": "bin/grabkit.js"
+    "grabkit": "bin/getgrabkit.js",
+    "getgrabkit": "bin/getgrabkit.js"
   },
   "main": "./cli/index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node ./bin/grabkit.js",
-    "dev": "node ./bin/grabkit.js",
-    "restore": "node ./bin/grabkit.js restore",
-    "prepack": "node -e \"try{require('fs').chmodSync('bin/grabkit.js',0o755)}catch(_e){}\""
+    "start": "node ./bin/getgrabkit.js",
+    "dev": "node ./bin/getgrabkit.js",
+    "restore": "node ./bin/getgrabkit.js restore",
+    "prepack": "node -e \"try{const fs=require('fs'); fs.chmodSync('bin/getgrabkit.js',0o755); fs.chmodSync('bin/grabkit.js',0o755)}catch(_e){}\""
   },
   "engines": {
     "node": ">=18.17.0"
@@ -42,10 +43,10 @@
     "@octokit/rest": "^21.1.1",
     "archiver": "^7.0.1",
     "blessed": "^0.1.81",
-    "blessed-contrib": "^4.11.0",
     "chalk": "^4.1.2",
     "cli-highlight": "^2.1.11",
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "figlet": "^1.8.2"
   },
   "repository": {
     "type": "git",

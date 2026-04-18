@@ -1,5 +1,6 @@
 "use strict";
 
+const os = require("os");
 const path = require("path");
 const chalk = require("chalk");
 const { runTui } = require("../ui/app");
@@ -13,23 +14,77 @@ const { DOWNLOAD_MODES } = require("../utils/constants");
 function printHelp() {
   const lines = [
     "GrabKit - advanced deterministic GitHub file grabber",
+    "Commands: grabkit, getgrabkit",
     "",
     "Usage:",
     "  grabkit                Start interactive TUI",
+    "  getgrabkit             Start interactive TUI",
     "  grabkit restore        Restore from ./grabkit.config.json",
-    "  grabkit restore <path> Restore from a custom snapshot file",
+    "  getgrabkit restore     Restore from ./grabkit.config.json",
+    "  grabkit restore PATH   Restore from a custom snapshot file",
+    "  getgrabkit restore PATH Restore from a custom snapshot file",
+    "",
+    "Examples:",
+    "  grabkit restore ./backup/grabkit.config.json",
+    "  getgrabkit restore ./backup/grabkit.config.json",
+    '  grabkit restore "D:/My Backups/grabkit.config.json"',
+    "",
+    "Note: Do not include angle brackets in commands.",
     "  grabkit --help         Show help",
   ];
 
   process.stdout.write(`${lines.join("\n")}\n`);
 }
 
-async function runRestore(snapshotArg) {
-  const snapshotPath = snapshotArg
-    ? path.resolve(process.cwd(), snapshotArg)
-    : path.join(process.cwd(), "grabkit.config.json");
+function resolveSnapshotPath(snapshotArg) {
+  if (!snapshotArg) {
+    return path.join(process.cwd(), "grabkit.config.json");
+  }
 
-  const snapshot = await loadProjectSnapshot(snapshotPath);
+  const trimmed = snapshotArg.trim();
+  if (!trimmed) {
+    return path.join(process.cwd(), "grabkit.config.json");
+  }
+
+  if (trimmed.includes("<") || trimmed.includes(">")) {
+    throw new Error(
+      "Invalid snapshot path. Use an actual file path and do not include angle brackets.",
+    );
+  }
+
+  if (trimmed === "path" || /^path_to_/i.test(trimmed)) {
+    throw new Error(
+      "Invalid snapshot path placeholder. Replace it with a real file path.",
+    );
+  }
+
+  if (trimmed === "~") {
+    return os.homedir();
+  }
+
+  if (trimmed.startsWith("~/") || trimmed.startsWith("~\\")) {
+    return path.join(os.homedir(), trimmed.slice(2));
+  }
+
+  return path.resolve(process.cwd(), trimmed);
+}
+
+async function runRestore(snapshotArg) {
+  const snapshotPath = resolveSnapshotPath(snapshotArg);
+
+  let snapshot;
+  try {
+    snapshot = await loadProjectSnapshot(snapshotPath);
+  } catch (error) {
+    if (error && error.code === "ENOENT") {
+      throw new Error(
+        `Snapshot file not found: ${snapshotPath}. Use: grabkit restore ./path/to/grabkit.config.json`,
+      );
+    }
+
+    throw error;
+  }
+
   const selectedFiles = Array.isArray(snapshot.selectedFiles)
     ? snapshot.selectedFiles
     : [];

@@ -1,130 +1,255 @@
 # GrabKit
 
-GrabKit is a deterministic, full-screen terminal UI for browsing GitHub repositories,
-selecting files, analyzing local JavaScript dependencies, and downloading minimal working sets.
+**Dependency-aware GitHub file extraction from an interactive terminal UI.**
+
+GrabKit helps you explore a repository tree, preview files, select exactly what you need, and download only the minimal working set.
+
+## Overview
+
+Modern repositories are large. Cloning an entire repo when you only need a few files is slow and noisy.
+
+GrabKit solves this by providing an interactive TUI workflow for selective extraction with optional dependency awareness.
+
+Key benefits:
+
+- Faster than full-clone workflows for targeted use cases
+- Minimal and deterministic file extraction
+- Built-in visibility (tree explorer + preview + dependency insight)
+- Developer-friendly CLI controls and restore workflow
 
 ## Features
 
-- Full-screen TUI with tree explorer + live preview
-- GitHub repository tree loading via a single tree API call
-- Multi-file and recursive folder selection
-- Smart Grab for local JavaScript dependency closure
-- Dependency insight modal tree
-- Live filter mode for large repository navigation
-- Download modes: flat, preserve structure, zip archive
-- Snapshot save/restore via `grabkit.config.json`
-- Raw GitHub CDN file fetches (no `/contents` API usage)
+- Interactive full-screen TUI file explorer
+- Live file preview panel
+- Multi-file and folder subtree selection
+- Smart Grab (dependency-aware download)
+- Dependency insight view before downloading
+- Real-time filter/search inside repository
+- Download modes:
+  - Flat
+  - Preserve structure
+  - Zip archive
+- Project snapshot and restore (`grabkit.config.json`)
 
-## Install
+## Installation
 
 ```bash
-npm install
+npm install -g getgrabkit
 ```
 
-## Run
+Note:
+
+- Official package for this project: `getgrabkit`
+- CLI commands supported: `grabkit` and `getgrabkit`
+
+## Usage
 
 ```bash
-npm start
+grabkit
 ```
 
 or
 
 ```bash
-npx grabkit
+getgrabkit
 ```
 
-## Avoid GitHub Rate Limits
+Typical flow:
 
-GrabKit supports two ways to reduce rate-limit issues:
+1. Enter a GitHub repository URL.
+2. Navigate the tree with arrow keys.
+3. Select files/folders with Space.
+4. Download selected files with Enter, or use Smart Grab with `s`.
 
-- It uses one GitHub API call for repository tree data.
-- It fetches file content from raw CDN endpoints:
-
-```text
-https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}
-```
-
-- The recommended setup is still a GitHub token (`GITHUB_TOKEN` or `GH_TOKEN`).
-
-PowerShell (current terminal session):
-
-```powershell
-$env:GITHUB_TOKEN="<your_token_here>"
-```
-
-PowerShell (persist for future terminals):
-
-```powershell
-setx GITHUB_TOKEN "<your_token_here>"
-```
-
-Then open a new terminal and run GrabKit again.
-
-For public repositories, no scope is typically required. For private repositories, use a token with repository access.
-
-Using a `.env` file (recommended for local development):
-
-1. Create a local env file from the template:
+Help:
 
 ```bash
-copy .env.example .env
+grabkit --help
 ```
 
-2. Open `.env` and set:
-
-```dotenv
-GITHUB_TOKEN=your_github_token_here
-```
-
-3. Start GrabKit normally:
+or
 
 ```bash
-npm start
+getgrabkit --help
 ```
 
-GrabKit now auto-loads `.env` at startup.
+## CLI Controls
 
-If your repository URL does not include `/tree/<branch>`, GrabKit uses `HEAD` by default in single-call mode.
-You can override this with:
+| Key       | Action                                 |
+| --------- | -------------------------------------- |
+| ↑ ↓ ← →   | Navigate tree                          |
+| Space     | Select/unselect file or folder subtree |
+| Enter     | Open folder or download selected files |
+| Backspace | Go to parent folder                    |
+| s         | Smart Grab (dependency-aware)          |
+| d         | Dependency insight view                |
+| /         | Filter/search mode                     |
+| m         | Choose download mode                   |
+| p         | Toggle preview panel                   |
+| a         | Select all                             |
+| x         | Deselect all                           |
+| i         | Invert selection                       |
+| t         | Toggle theme                           |
+| q         | Quit                                   |
 
-```bash
-GRABKIT_DEFAULT_BRANCH=main
-```
+## Examples
 
-## Restore from Snapshot
+### Example 1: Selective download from a large repo
+
+1. Run `grabkit` (or `getgrabkit`)
+2. Enter: `https://github.com/owner/repo`
+3. Navigate to `src/utils`
+4. Select `format.js` and `validate.js`
+5. Press Enter to download
+
+### Example 2: Dependency-aware extraction (Smart Grab)
+
+1. Highlight/select `src/server/index.js`
+2. Press `s`
+3. Review dependency count in confirmation
+4. Continue to download a minimal working set
+
+### Example 3: Restore previous snapshot
 
 ```bash
 grabkit restore
 ```
 
-or with custom path:
+or
 
 ```bash
-grabkit restore ./path/to/grabkit.config.json
+grabkit restore ./backup/grabkit.config.json
 ```
 
-## Keybindings
+Equivalent alias commands:
 
-- `↑ ↓ ← →`: navigate and expand/collapse tree
-- `Enter`: open folder (if no selected files) or download selected files
-- `Backspace`: jump to parent folder
-- `Space`: select/unselect file or folder subtree
-- `q`: quit
+```bash
+getgrabkit restore
+getgrabkit restore ./backup/grabkit.config.json
+```
 
-Advanced:
+## Smart Grab
 
-- `s`: Smart Grab (dependency-aware)
-- `d`: dependency insight modal
-- `p`: toggle preview panel
-- `/`: filter/search mode
-- `a`: select all
-- `x`: deselect all
-- `i`: invert selection
-- `m`: choose download mode
-- `t`: choose theme (classic, minimal, vivid)
-- `PageUp` / `PageDown`: scroll preview or modal content
+Smart Grab parses selected JavaScript files and recursively resolves **local** dependencies.
 
-## Architecture
+What it detects:
+
+- `import ... from '...'`
+- `require('...')`
+- dynamic `import('...')`
+
+Current language support:
+
+- JavaScript family (`.js`, `.mjs`, `.cjs`, `.jsx`)
+
+Limitations:
+
+- External packages (`react`, `express`, etc.) are intentionally ignored
+- Non-local imports are not pulled
+- Missing or circular references are reported, then handled safely
+
+## Configuration
+
+User-level configuration location:
+
+```text
+~/.grabkit/config.json
+```
+
+Example structure:
+
+```json
+{
+  "savedRepos": [
+    "https://github.com/owner/repo",
+    "https://github.com/org/project"
+  ],
+  "preferences": {
+    "downloadMode": "preserve",
+    "theme": "classic",
+    "previewEnabled": true
+  },
+  "githubToken": "optional_token_value"
+}
+```
+
+Field notes:
+
+- `savedRepos`: quick-access repository history
+- `preferences`: UI/download defaults
+- `githubToken`: optional; environment variables are preferred for security
+
+## GitHub API Strategy
+
+GrabKit minimizes API usage to reduce rate-limit pressure.
+
+- Uses one tree API call for repository structure:
+
+```text
+GET /repos/:owner/:repo/git/trees/:branch?recursive=1
+```
+
+- Uses `raw.githubusercontent.com` for file content downloads:
+
+```text
+https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}
+```
+
+- Avoids `/contents` API usage for file payloads
+
+## Troubleshooting
+
+### `grabkit` or `getgrabkit` is not recognized
+
+1. Verify installation:
+
+```bash
+npm ls -g --depth=0 getgrabkit
+```
+
+2. Check npm prefix:
+
+```bash
+npm config get prefix
+```
+
+3. Ensure npm global bin is in PATH.
+
+Windows common PATH entry:
+
+```text
+C:\Users\<your-user>\AppData\Roaming\npm
+```
+
+4. Restart terminal.
+
+### Permission issues (global install)
+
+- On Windows, run terminal as Administrator if needed.
+- If stale shim conflicts appear, uninstall and reinstall globally.
+
+### Rate limit issues
+
+Set token temporarily:
+
+```powershell
+$env:GITHUB_TOKEN="your_token_here"
+```
+
+Persist token:
+
+```powershell
+setx GITHUB_TOKEN "your_token_here"
+```
+
+### Invalid repository URL
+
+- Ensure URL format is `https://github.com/<owner>/<repo>`
+- For branch-specific URLs, use `.../tree/<branch>`
+
+## Development
+
+Project structure:
 
 ```text
 /bin
@@ -136,9 +261,46 @@ Advanced:
 /utils
 ```
 
-## Notes
+Run locally:
 
-- External dependencies (`react`, `express`, npm packages) are intentionally ignored by Smart Grab.
-- Local dependency parsing currently targets JavaScript-family files (`.js`, `.mjs`, `.cjs`, `.jsx`).
-- Rate limit and missing-file errors are surfaced directly in the UI status bar.
-- Downloads are written under the current working directory.
+```bash
+npm install
+npm start
+```
+
+Link local build globally for testing:
+
+```bash
+npm link
+grabkit --help
+getgrabkit --help
+```
+
+## Contributing
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Make focused changes with tests/validation.
+4. Open a Pull Request with a clear description.
+
+Recommended PR content:
+
+- What changed
+- Why it changed
+- How to verify
+- Screenshots or terminal output (if relevant)
+
+## Skills and Technologies
+
+- **Node.js (CLI development):** runtime and module ecosystem for shipping portable command-line tools.
+- **Terminal UI (blessed):** full-screen interactive interface with panels, lists, and keyboard-driven navigation.
+- **GitHub API integration:** repository tree retrieval with minimal API surface.
+- **File system handling:** deterministic writing, snapshot persistence, and mode-based output layouts.
+- **Dependency parsing (AST/regex):** local import/require extraction for Smart Grab and dependency insight.
+- **CLI UX design:** keybinding ergonomics, status messaging, error recovery, and flow clarity.
+- **Package publishing (npm):** global-installable distribution with executable bin mapping.
+- **Cross-platform CLI development:** Windows/macOS/Linux command behavior and path handling considerations.
+
+## License
+
+MIT
