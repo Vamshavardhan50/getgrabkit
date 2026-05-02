@@ -2,7 +2,7 @@
 
 const os = require("os");
 const path = require("path");
-const chalk = require("chalk");
+const { cyan, green, yellow } = require("../utils/color");
 const { runTui } = require("../ui/app");
 const { GitHubService } = require("../services/github/githubService");
 const {
@@ -100,7 +100,7 @@ async function runRestore(snapshotArg) {
     throw new Error("Snapshot has no files to restore.");
   }
 
-  process.stdout.write(chalk.cyan("Restoring snapshot...\n"));
+  process.stdout.write(cyan("Restoring snapshot...\n"));
 
   const githubService = new GitHubService();
   const repoContext = await githubService.fetchRepositoryTree(snapshot.repoUrl);
@@ -136,14 +136,14 @@ async function runRestore(snapshotArg) {
   });
 
   process.stdout.write(
-    chalk.green(
+    green(
       `Restore complete. ${result.fileCount} files downloaded to ${result.outputPath}\n`,
     ),
   );
 
   if (missingFiles.length > 0) {
     process.stdout.write(
-      chalk.yellow(
+      yellow(
         `Skipped ${missingFiles.length} missing files:\n${missingFiles
           .slice(0, 20)
           .join("\n")}\n`,

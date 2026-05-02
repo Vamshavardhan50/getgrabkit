@@ -1,6 +1,6 @@
 {
   "name": "getgrabkit",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Deterministic advanced TUI for selecting and downloading GitHub repository files",
   "license": "MIT",
   "keywords": [
@@ -19,6 +19,9 @@
     "ui",
     "utils",
     "README.md",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md",
     "LICENSE"
   ],
   "bin": {
@@ -43,10 +46,13 @@
     "@octokit/rest": "^21.1.1",
     "archiver": "^7.0.1",
     "blessed": "^0.1.81",
-    "chalk": "^4.1.2",
-    "cli-highlight": "^2.1.11",
     "dotenv": "^17.4.2",
     "figlet": "^1.8.2"
+  },
+  "overrides": {
+    "@octokit/openapi-types": "^25.1.0",
+    "@octokit/types": "^14.1.0",
+    "glob": "^13.0.6"
   },
   "repository": {
     "type": "git",

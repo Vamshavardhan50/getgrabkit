@@ -16,6 +16,7 @@
         <a class="brand" href="#top">GetGrabKit Docs</a>
         <div class="nav-links">
           <a href="#install">Install</a>
+          <a href="#quick-fixes">Quick Fixes</a>
           <a href="#usage">Usage</a>
           <a href="#controls">Controls</a>
           <a href="#smart-grab">Smart Grab</a>
@@ -63,14 +64,43 @@
         </p>
       </section>
 
+      <section id="quick-fixes" class="card">
+        <h2>Quick Fixes</h2>
+        <p>Use these when you want to get unblocked quickly.</p>
+        <ol>
+          <li>Start the app with <code>grabkit</code>.</li>
+          <li>
+            If repo load fails, use a branch URL:
+            <code>https://github.com/&lt;owner&gt;/&lt;repo&gt;/tree/main</code>
+            (or <code>.../tree/master</code>).
+          </li>
+          <li>
+            Smart Grab flow: select file(s) -> press <code>s</code> -> confirm
+            <code>y</code>.
+          </li>
+          <li>Dependency preview before download: press <code>d</code>.</li>
+          <li>
+            <code>GITHUB_TOKEN</code> is optional; set it for higher rate limits
+            and private repos.
+          </li>
+        </ol>
+      </section>
+
       <section id="usage" class="card">
         <h2>Usage</h2>
         <ol>
           <li>Run <code>grabkit</code>.</li>
           <li>Paste a GitHub repository URL in the input bar.</li>
+          <li>
+            If branch auto-detection fails, use
+            <code>https://github.com/&lt;owner&gt;/&lt;repo&gt;/tree/main</code>
+            (or <code>tree/master</code>).
+          </li>
           <li>Use arrow keys to navigate the tree explorer.</li>
           <li>Press Space to select files/folders.</li>
-          <li>Press Enter to download selected files.</li>
+          <li>
+            Press <code>s</code> for Smart Grab, or Enter for manual download.
+          </li>
         </ol>
       </section>
 
@@ -140,10 +170,20 @@
           Smart Grab analyzes local JavaScript-family imports and includes
           dependency files automatically in your final download set.
         </p>
+        <ol>
+          <li>Select or highlight one or more JavaScript-family files.</li>
+          <li>Press <code>s</code> to analyze dependencies.</li>
+          <li>Review the prompt and press <code>y</code> to continue.</li>
+          <li>Use <code>d</code> anytime to inspect dependency insight.</li>
+        </ol>
         <ul>
           <li>Detects import, require, and dynamic import for local paths.</li>
           <li>Ignores external packages by design.</li>
           <li>Reports unresolved and circular references safely.</li>
+          <li>
+            Current language scope: <code>.js</code>, <code>.mjs</code>,
+            <code>.cjs</code>, <code>.jsx</code>.
+          </li>
         </ul>
       </section>
 
@@ -154,7 +194,19 @@
 npm config get prefix</code></pre>
         <p>Make sure your npm global bin directory is in PATH.</p>
 
+        <h3>Could not resolve repository default branch</h3>
+        <p>
+          Use a branch-specific URL such as
+          <code>https://github.com/&lt;owner&gt;/&lt;repo&gt;/tree/main</code>
+          or <code>tree/master</code>.
+        </p>
+        <pre><code>$env:GRABKIT_DEFAULT_BRANCH="main"</code></pre>
+
         <h3>GitHub API limits</h3>
+        <p>
+          <code>GITHUB_TOKEN</code> is optional. GrabKit can run without it, but
+          tokens provide higher rate limits and private repo access.
+        </p>
         <pre><code>$env:GITHUB_TOKEN="your_token_here"
 setx GITHUB_TOKEN "your_token_here"</code></pre>
       </section>

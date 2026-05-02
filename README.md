@@ -4,6 +4,22 @@
 
 GrabKit helps you explore a repository tree, preview files, select exactly what you need, and download only the minimal working set.
 
+## Quick Fixes
+
+Use these when you want to get unblocked quickly.
+
+1. Start the app:
+   `grabkit`
+2. If repo load fails, use a branch URL:
+   `https://github.com/<owner>/<repo>/tree/main`
+   (or `.../tree/master`)
+3. Smart Grab flow:
+   select file(s) -> press `s` -> confirm `y`
+4. Dependency preview before download:
+   press `d`
+5. Token note:
+   `GITHUB_TOKEN` is optional; set it for higher rate limits and private repos.
+
 ## Overview
 
 Modern repositories are large. Cloning an entire repo when you only need a few files is slow and noisy.
@@ -81,6 +97,11 @@ Typical flow:
 3. Select files/folders with Space.
 4. Download selected files with Enter, or use Smart Grab with `s`.
 
+If repository loading fails with default branch resolution, use a branch-specific URL:
+
+- `https://github.com/<owner>/<repo>/tree/main`
+- `https://github.com/<owner>/<repo>/tree/master`
+
 Help:
 
 ```bash
@@ -126,8 +147,10 @@ getgrabkit --help
 
 1. Highlight/select `src/server/index.js`
 2. Press `s`
-3. Review dependency count in confirmation
-4. Continue to download a minimal working set
+3. Review dependency count in confirmation prompt
+4. Press `y` to continue, or `n` to cancel
+5. (Optional) Press `d` before Smart Grab to view dependency insight
+6. Continue to download a minimal working set
 
 ### Example 3: Restore previous snapshot
 
@@ -151,6 +174,14 @@ getgrabkit restore ./backup/grabkit.config.json
 ## Smart Grab
 
 Smart Grab parses selected JavaScript files and recursively resolves **local** dependencies.
+
+How to use:
+
+1. Load a repository in the TUI.
+2. Select one or more files (or highlight a file).
+3. Press `s`.
+4. Confirm the prompt: `Found N dependencies. Continue? (y/n)`.
+5. Download includes selected files plus resolved local dependencies.
 
 What it detects:
 
@@ -250,6 +281,9 @@ C:\Users\<your-user>\AppData\Roaming\npm
 
 ### Rate limit issues
 
+`GITHUB_TOKEN` is optional. You can run and build without it.
+Use a token for higher rate limits and private repository access.
+
 Set token temporarily:
 
 ```powershell
@@ -260,6 +294,19 @@ Persist token:
 
 ```powershell
 setx GITHUB_TOKEN "your_token_here"
+```
+
+### Could not resolve repository default branch
+
+If you see this message in TUI, provide a branch-specific URL:
+
+- `https://github.com/<owner>/<repo>/tree/main`
+- `https://github.com/<owner>/<repo>/tree/master`
+
+You can also set a default branch for the current shell session:
+
+```powershell
+$env:GRABKIT_DEFAULT_BRANCH="main"
 ```
 
 ### Invalid repository URL
@@ -298,6 +345,9 @@ getgrabkit --help
 
 ## Contributing
 
+See `CONTRIBUTING.md` for contribution workflow and development setup.
+See `CODE_OF_CONDUCT.md` for community standards.
+
 1. Fork the repository.
 2. Create a feature branch.
 3. Make focused changes with tests/validation.
@@ -309,6 +359,10 @@ Recommended PR content:
 - Why it changed
 - How to verify
 - Screenshots or terminal output (if relevant)
+
+## Security
+
+See `SECURITY.md` for vulnerability reporting guidance.
 
 ## Skills and Technologies
 

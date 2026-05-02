@@ -1,12 +1,10 @@
 "use strict";
 
 const blessed = require("blessed");
-const { highlight } = require("cli-highlight");
 const { GitHubService } = require("../services/github/githubService");
 const {
   buildSmartDependencySet,
   buildDependencyTreeText,
-  isJavaScriptFile,
 } = require("../services/parser/dependencyParser");
 const {
   downloadFiles,
@@ -96,45 +94,6 @@ const THEMES = {
     statusSuccessTag: "green-fg",
     statusWarningTag: "yellow-fg",
     statusErrorTag: "red-fg",
-  },
-};
-
-const JS_HIGHLIGHT_THEMES = {
-  classic: {
-    keyword: ["blue"],
-    built_in: ["white"],
-    string: ["green"],
-    number: ["yellow"],
-    literal: ["yellow"],
-    title: ["white", "bold"],
-    attr: ["white"],
-    punctuation: ["white"],
-    params: ["white"],
-    comment: ["grey"],
-  },
-  minimal: {
-    keyword: ["white"],
-    built_in: ["white"],
-    string: ["white"],
-    number: ["white"],
-    literal: ["white"],
-    title: ["white", "bold"],
-    attr: ["white"],
-    punctuation: ["white"],
-    params: ["white"],
-    comment: ["grey"],
-  },
-  vivid: {
-    keyword: ["cyan"],
-    built_in: ["yellow"],
-    string: ["green"],
-    number: ["yellow"],
-    literal: ["yellow"],
-    title: ["magenta", "bold"],
-    attr: ["white"],
-    punctuation: ["white"],
-    params: ["white"],
-    comment: ["grey"],
   },
 };
 
@@ -1222,19 +1181,7 @@ class GrabKitApp {
         content = `${content.slice(0, MAX_PREVIEW_BYTES)}\n\n... preview truncated ...`;
       }
 
-      let rendered = content;
-      if (isJavaScriptFile(currentNode.path)) {
-        try {
-          rendered = highlight(content, {
-            language: "javascript",
-            theme:
-              JS_HIGHLIGHT_THEMES[this.themeKey] || JS_HIGHLIGHT_THEMES.classic,
-            ignoreIllegals: true,
-          });
-        } catch (_error) {
-          rendered = content;
-        }
-      }
+      const rendered = content;
 
       this.previewCache.set(currentNode.path, rendered);
       this.previewBox.setContent(rendered);
